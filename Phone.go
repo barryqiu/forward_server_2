@@ -22,6 +22,10 @@ type Phone struct {
 	Last_known     string
 	Overhead       int
 	Overheat_count int
+	data_client    chan []byte
+	data_device    chan []byte
+	stop           chan int
+	client_conn    chan ClientConn
 }
 
 func (phone *Phone) append_conn(conn net.TCPConn) error {
@@ -194,7 +198,7 @@ func set_phone_ws_state_in_redis(phone_name string, state int) (error) {
 		return err;
 	}
 	phones[phone_name].log_to_file("REDIS SET ", redis_key, ": ", phone_name, ":", state)
-	return  err
+	return err
 }
 
 func get_phone_ws_state_in_redis(phone_name string) (int) {
@@ -215,7 +219,7 @@ func get_phone_ws_state_in_redis(phone_name string) (int) {
 		return 0;
 	}
 	phones[phone_name].log_to_file("REDIS GET WS State ", redis_key, ": ", state)
-	return  state
+	return state
 }
 
 /**
