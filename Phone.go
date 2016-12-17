@@ -13,6 +13,7 @@ import (
 	"sync"
     "time"
     "strconv"
+    "bytes"
 )
 
 type Phone struct {
@@ -57,26 +58,24 @@ func ReadDataFromDevice(phone *Phone) {
 
         fmt.Println(contentStr)
 
-        pack_start_index := strings.Index(contentStr, "STP")
+        pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
             phone.Conn.Close()
             phone.Conn = net.TCPConn{}
             return
         }
 
-        if strings.HasPrefix(contentStr, "STP") {
-            // STP device_name/random
-            lines := strings.Split(contentStr, "/r/n")
-            if len(lines) > 1 {
-                length := lines[1]
-                int_length, err := strconv.Atoi(length)
-                if err != nil {
-                    phone.Conn.Close()
-                    phone.Conn = net.TCPConn{}
-                    return
-                }
-                pack_length = int_length +  strings.Index(contentStr, "/r/n/r/n") + 4
+        // STP device_name/random
+        lines := strings.Split(contentStr, "/r/n")
+        if len(lines) > 1 {
+            length := lines[1]
+            int_length, err := strconv.Atoi(length)
+            if err != nil {
+                phone.Conn.Close()
+                phone.Conn = net.TCPConn{}
+                return
             }
+            pack_length = int_length +  bytes.Index(content, []byte("/r/n/r/n")) + 4
         }
 
         if (pack_length <= len(content)){
