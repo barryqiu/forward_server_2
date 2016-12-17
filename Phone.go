@@ -14,6 +14,7 @@ import (
     "time"
     "strconv"
     "bytes"
+    "encoding/json"
 )
 
 type Phone struct {
@@ -22,11 +23,17 @@ type Phone struct {
 	Device_name string
 	Random      string
 	Last_known  string
+    Client_conn ClientConn
 	Data_client chan []byte
 	Data_device chan []byte
 	Stop        chan int
 	CloseConn   chan int
-	Client_conn chan ClientConn
+}
+
+type DeviceMsg struct  {
+    MsgType string `json:"msgtype"`
+    Content string `json:"content"`
+
 }
 
 func ReceivePhoneData(phone *Phone) {
@@ -35,8 +42,22 @@ func ReceivePhoneData(phone *Phone) {
 
 func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
     str_data := string(data)
-    head := string(data[:head_length])
-    fmt.Println(head)
+    str_head := string(data[:head_length])
+    body := data[head_length:]
+    str_type := str_head[3]
+    if(str_type == "1"){
+        var deviceMsg DeviceMsg
+        err := json.Unmarshal(body, deviceMsg)
+        if err != nil{
+            return
+        }
+        if deviceMsg.MsgType == "heart"{
+            phone.Conn.Write(body)
+        }
+    }else if str_type == "2"{
+        phone.Client_conn.send <- body
+    }
+    fmt.Println(str_head)
     fmt.Println(str_data)
 }
 
@@ -235,7 +256,7 @@ func read_phones_from_file() {
 		log.Println(line)
 		infos := strings.Split(line, " ")
 		if len(infos) == 2 {
-            phone := Phone{Device_name: infos[0], Random: infos[1], Client_conn: make(chan ClientConn),
+            phone := Phone{Device_name: infos[0], Random: infos[1],
                 Data_client: make(chan []byte, 4096), Data_device: make(chan []byte, 4096),
                 Stop: make(chan int), CloseConn:make(chan  int)}
             phone.Listen()
@@ -320,7 +341,7 @@ func process_phone_conn(conn net.TCPConn) {
 			return
 		}
 
-		phone := Phone{Device_name: device_name, Random: random, Client_conn: make(chan ClientConn),
+		phone := Phone{Device_name: device_name, Random: random,
 			Data_client: make(chan []byte, 4096), Data_device: make(chan []byte, 4096),
 			Stop: make(chan int), CloseConn:make(chan  int)}
 		phone.add_to_file()
@@ -354,7 +375,7 @@ func process_phone_conn(conn net.TCPConn) {
 				phones[device_name].append_conn(conn)
 				return
 			} else if !ok {
-                phone := Phone{Device_name: device_name, Random: random, Client_conn: make(chan ClientConn),
+                phone := Phone{Device_name: device_name, Random: random,
                     Data_client: make(chan []byte, 4096), Data_device: make(chan []byte, 4096),
                     Stop: make(chan int), CloseConn:make(chan  int)}
 				phone.add_to_file()
