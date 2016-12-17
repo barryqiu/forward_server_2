@@ -33,8 +33,10 @@ func ReceivePhoneData(phone *Phone) {
 
 }
 
-func ProcessDevicePackage(phone *Phone, data []byte)  {
+func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
     str_data := string(data)
+    head := string(data[:head_length])
+    fmt.Println(head)
     fmt.Println(str_data)
 }
 
@@ -54,10 +56,6 @@ func ReadDataFromDevice(phone *Phone) {
         }
         content = append(content, buf[:n]...)
 
-        contentStr := string(content)
-
-        fmt.Println(contentStr)
-
         pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
             phone.Conn.Close()
@@ -65,8 +63,11 @@ func ReadDataFromDevice(phone *Phone) {
             return
         }
 
+        head_length := bytes.Index(content, []byte("/r/n/r/n")) + len([]byte("/r/n/r/n"))
+        headStr := string(content[:head_length])
+
         // STP device_name/random
-        lines := strings.Split(contentStr, "/r/n")
+        lines := strings.Split(headStr, "/r/n")
         if len(lines) > 1 {
             length := lines[1]
             int_length, err := strconv.Atoi(length)
@@ -75,11 +76,16 @@ func ReadDataFromDevice(phone *Phone) {
                 phone.Conn = net.TCPConn{}
                 return
             }
-            pack_length = int_length +  bytes.Index(content, []byte("/r/n/r/n")) + len([]byte("/r/n/r/n"))
+            pack_length = int_length
+        }else {
+            phone.Conn.Close()
+            phone.Conn = net.TCPConn{}
+            return
         }
+        pack_length += head_length
 
         if (pack_length <= len(content)){
-            ProcessDevicePackage(phone, content[:pack_length])
+            ProcessDevicePackage(phone, content[:pack_length], head_length)
             content = content[pack_length:]
         }
     }
