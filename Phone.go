@@ -28,16 +28,16 @@ type Phone struct {
 	Client_conn chan ClientConn
 }
 
-func ReceivePhoneData(phone Phone) {
+func ReceivePhoneData(phone *Phone) {
 
 }
 
-func processDevicePackage(phone Phone, data []byte)  {
+func ProcessDevicePackage(phone *Phone, data []byte)  {
     str_data := string(data)
     fmt.Println(str_data)
 }
 
-func ReadDataFromDevice(phone Phone) {
+func ReadDataFromDevice(phone *Phone) {
     var content []byte
     pack_length := 0
     for ; ;  {
@@ -80,7 +80,7 @@ func ReadDataFromDevice(phone Phone) {
         }
 
         if (pack_length <= len(content)){
-            processDevicePackage(phone, content[:pack_length])
+            ProcessDevicePackage(phone, content[:pack_length])
             content = content[pack_length:]
         }
     }
@@ -112,12 +112,12 @@ func (phone *Phone) Listen()  {
     /**
 	处理收到的各种 chan 信息
 	*/
-    go ReceivePhoneData(*phone)
+    go ReceivePhoneData(phone)
 
     /**
     从 device 端接受心跳信息
     */
-    go ReadDataFromDevice(*phone)
+    go ReadDataFromDevice(phone)
 
 }
 
