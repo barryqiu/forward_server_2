@@ -75,7 +75,7 @@ func ReadDataFromDevice(phone *Phone) {
                 phone.Conn = net.TCPConn{}
                 return
             }
-            pack_length = int_length +  bytes.Index(content, []byte("/r/n/r/n")) + 4
+            pack_length = int_length +  bytes.Index(content, []byte("/r/n/r/n")) + len([]byte("/r/n/r/n"))
         }
 
         if (pack_length <= len(content)){
