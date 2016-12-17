@@ -55,8 +55,12 @@ func ReadDataFromDevice(phone Phone) {
 
         contentStr := string(content)
 
+        fmt.Println(contentStr)
+
         pack_start_index := strings.Index(contentStr, "STP")
         if pack_start_index != 0 {
+            phone.Conn.Close()
+            phone.Conn== net.TCPConn{}
             return
         }
 
@@ -67,6 +71,8 @@ func ReadDataFromDevice(phone Phone) {
                 length := lines[1]
                 int_length, err := strconv.Atoi(length)
                 if err != nil {
+                    phone.Conn.Close()
+                    phone.Conn== net.TCPConn{}
                     return
                 }
                 pack_length = int_length +  strings.Index(contentStr, "/r/n/r/n") + 4
@@ -284,6 +290,7 @@ func process_phone_conn(conn net.TCPConn) {
 		return
 	}
 
+    // GET /register_/device_name/random/version
 	if strings.HasPrefix(content, "GET /register_") {
 		req, err := getRequestInfo(content)
 		if err != nil {
