@@ -240,7 +240,7 @@ func start_phones() {
 
 	read_phones_from_file()
 
-	add, err := net.ResolveTCPAddr("tcp", ":110")
+	add, err := net.ResolveTCPAddr("tcp", ":5110")
 	if err != nil {
 		log.Println("error listen:", err)
 		return
@@ -251,7 +251,7 @@ func start_phones() {
 		return
 	}
 	defer listen.Close()
-	log.Println("listen 110 ok")
+	log.Println("listen 5110 ok")
 
 	for {
 		conn, err := listen.AcceptTCP()

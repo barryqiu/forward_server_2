@@ -41,7 +41,7 @@ func main() {
 
 	go start_ws()
 
-	add, err := net.ResolveTCPAddr("tcp", ":8000")
+	add, err := net.ResolveTCPAddr("tcp", ":5000")
 	if err != nil {
 		log.Println("error listen:", err)
 		return
@@ -52,7 +52,7 @@ func main() {
 		return
 	}
 	defer listen.Close()
-	log.Println("client listen 8000 ok")
+	log.Println("client listen 5000 ok")
 
 	for {
 		conn, err := listen.AcceptTCP()

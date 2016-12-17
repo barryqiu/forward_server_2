@@ -62,7 +62,7 @@ func processTestConn(device_name string, conn net.TCPConn) {
 		var phone_conn net.TCPConn
 		var err error
 		for {
-			phone_conn, err = phones[device_name].get_conn()
+			phone_conn, err = phones[device_name].Conn
 			if (net.TCPConn{}) == phone_conn || err != nil {
 				phones[device_name].log_to_file(device_name, "test conn no phone conn error:", err)
 				//log.Println(device_name, "test conn no phone conn error:", err)
@@ -206,7 +206,7 @@ func processClientReq(conn net.TCPConn) {
 
 	var phone_conn net.TCPConn
 	for {
-		phone_conn, err = phones[device_name].get_conn()
+		phone_conn, err = phones[device_name].Conn()
 		if (net.TCPConn{}) == phone_conn || err != nil {
 			phones[device_name].log_to_file("no phone conn error:", err)
 			//log.Println("no phone conn error:", err)
