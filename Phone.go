@@ -12,6 +12,7 @@ import (
 	"strings"
 	"sync"
     "time"
+    "strconv"
 )
 
 type Phone struct {
@@ -50,7 +51,7 @@ func ReadDataFromDevice(phone Phone) {
             log.Println("phone conn read error:", err)
             continue
         }
-        content = string(append(content, buf[:n]...))
+        content = append(content, buf[:n]...)
 
         contentStr := string(content)
 
@@ -59,13 +60,16 @@ func ReadDataFromDevice(phone Phone) {
             return
         }
 
-        if strings.HasPrefix(content, "STP") {
+        if strings.HasPrefix(contentStr, "STP") {
             // STP device_name/random
-            lines := strings.Split(content, "/r/n")
+            lines := strings.Split(contentStr, "/r/n")
             if len(lines) > 1 {
                 length := lines[1]
-                fmt.Println(length)
-                pack_length = length +  strings.Index(contentStr, "/r/n/r/n") + 4
+                int_length, err := strconv.Atoi(length)
+                if err != nil {
+                    return
+                }
+                pack_length = int_length +  strings.Index(contentStr, "/r/n/r/n") + 4
             }
         }
 
@@ -80,7 +84,7 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 	phone.mu.Lock()
 
     // 断开当前链接
-    if phone.Conn{
+    if (net.TCPConn{}) != phone.Conn {
         phone.Conn.Close()
         phone.Conn = net.TCPConn{}
     }
@@ -102,12 +106,12 @@ func (phone *Phone) Listen()  {
     /**
 	处理收到的各种 chan 信息
 	*/
-    go ReceivePhoneData(phone)
+    go ReceivePhoneData(*phone)
 
     /**
     从 device 端接受心跳信息
     */
-    go ReadDataFromDevice(phone)
+    go ReadDataFromDevice(*phone)
 
 }
 

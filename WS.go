@@ -266,8 +266,8 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 			var phone_conn net.TCPConn
 			retry := 0
 			for {
-				phone_conn, err = phones[device_name].Conn()
-				if (net.TCPConn{}) == phone_conn || err != nil {
+				phone_conn = phones[device_name].Conn
+				if (net.TCPConn{}) == phone_conn {
 					phones[device_name].log_to_file("no phone conn error:", err)
 					//log.Println("no phone conn error:", err)
 					if (retry >= 3) {
