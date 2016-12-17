@@ -60,7 +60,7 @@ func ReadDataFromDevice(phone Phone) {
         pack_start_index := strings.Index(contentStr, "STP")
         if pack_start_index != 0 {
             phone.Conn.Close()
-            phone.Conn== net.TCPConn{}
+            phone.Conn = net.TCPConn{}
             return
         }
 
@@ -72,7 +72,7 @@ func ReadDataFromDevice(phone Phone) {
                 int_length, err := strconv.Atoi(length)
                 if err != nil {
                     phone.Conn.Close()
-                    phone.Conn== net.TCPConn{}
+                    phone.Conn = net.TCPConn{}
                     return
                 }
                 pack_length = int_length +  strings.Index(contentStr, "/r/n/r/n") + 4
