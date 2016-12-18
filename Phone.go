@@ -47,8 +47,9 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
     str_type := str_head[3:4]
     if(str_type == "1"){
         var deviceMsg DeviceMsg
-        err := json.Unmarshal(body, deviceMsg)
+        err := json.Unmarshal(body, &deviceMsg)
         if err != nil{
+            fmt.Println(err)
             return
         }
         if deviceMsg.MsgType == "heart"{
