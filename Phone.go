@@ -307,6 +307,8 @@ func process_phone_conn(conn net.TCPConn) {
 	}
 	content := string(buf[:n])
 
+    fmt.Println(content)
+
 	pos := strings.Index(content, "/")
 	if pos == -1 {
 		conn.Close()
@@ -348,6 +350,7 @@ func process_phone_conn(conn net.TCPConn) {
 		conn.Close()
 		return
 	}
+
 
 	if strings.HasPrefix(content, "STP") {
 		// STP device_name/random
