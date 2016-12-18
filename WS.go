@@ -7,16 +7,9 @@ import (
 	"log"
 	"strings"
 	"net"
-	"io"
-	//"time"
-	"bytes"
 	"time"
-	//"io/ioutil"
 	"fmt"
-	//"encoding/base64"
-	//"os"
 	"encoding/json"
-	//"errors"
 )
 
 var (
@@ -24,39 +17,9 @@ var (
 
 	upGrader = websocket.Upgrader{ReadBufferSize:4096, WriteBufferSize:40960} // use default options
 
-	sendVRequestContent = `GET /screenshot.jpg?vlfnnnn HTTP/1.1
-Accept: image/webp,image/*,*/*;q=0.8
-Accept-Encoding: gzip, deflate, sdch
-Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
-Cache-Control: max-age=259200
-Connection: keep-alive
-
-`
-	sendHRequestContent = `GET /screenshot.jpg?hlfnnnn HTTP/1.1
-Accept: image/webp,image/*,*/*;q=0.8
-Accept-Encoding: gzip, deflate, sdch
-Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
-Cache-Control: max-age=259200
-Connection: keep-alive
-
-`
-
-	sendVRequestContentFirst = `GET /screenshot.jpg?vlfnnnf HTTP/1.1
-Accept: image/webp,image/*,*/*;q=0.8
-Accept-Encoding: gzip, deflate, sdch
-Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
-Cache-Control: max-age=259200
-Connection: keep-alive
-
-`
-	sendHRequestContentFirst = `GET /screenshot.jpg?hlfnnnf HTTP/1.1
-Accept: image/webp,image/*,*/*;q=0.8
-Accept-Encoding: gzip, deflate, sdch
-Accept-Language: zh-CN,zh;q=0.8,en;q=0.6
-Cache-Control: max-age=259200
-Connection: keep-alive
-
-`
+	sendVRequestContent = `STP1\r\n34\r\n{"msgtype":"startdata","data":"v"}`
+	sendHRequestContent = `STP1\r\n34\r\n{"msgtype":"startdata","data":"h"}`
+    stopRequestContent = `STP1\r\n32\r\n{"msgtype":"stopdata","data":""}`
 )
 
 const (
@@ -77,19 +40,11 @@ type ClientParam struct {
 
 
 
-func getSendContent(device_type string , first_frame bool ) string  {
+func getSendContent(device_type string) string  {
 	if device_type == "h" {
-		if first_frame{
-			return sendHRequestContentFirst
-		}else {
 			return sendHRequestContent
-		}
 	}else {
-		if first_frame{
-			return sendVRequestContentFirst
-		}else {
 			return sendVRequestContent
-		}
 	}
 }
 
@@ -216,13 +171,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	device_name := infos[1]
 	alias := ""
 
-	//err = judge_auth(clientParam.token,device_name)
-	//if err != nil{
-	//	log.Println(device_name + " wrong auth")
-	//	conn.Close()
-	//	return
-	//}
-
 	if _, ok := phones[device_name]; !ok {
 		device_map, err := trans_phone_address(device_name)
 		if _, ok := phones[device_map]; err == nil && ok {
@@ -251,81 +199,26 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 	go clientConn.writePump()
 	go clientConn.readPump()
 
-	set_phone_ws_state_in_redis(device_name, 1)
-	first_frame := true
+    if (phones[device_name].Conn == net.TCPConn{}){
+        phones[device_name].log_to_file("no phone conn error:", err)
+        conn.Close()
+        return
+    }
+    set_phone_ws_state_in_redis(device_name, 1)
+    phones[device_name].Client_conn = clientConn
+    phones[device_name].Conn.Write([]byte(getSendContent(device_type)))
+
 	for {
-		select {
-		case stop := <-clientConn.stop:
-			if stop == 1 {
-				phones[device_name].log_to_file("client close, stop fetch data")
-				//log.Println("client close, stop fetch data")
-				set_phone_ws_state_in_redis(device_name, 0)
-				return
-			}
-		default:
-			var phone_conn net.TCPConn
-			retry := 0
-			for {
-				phone_conn = phones[device_name].Conn
-				if (net.TCPConn{}) == phone_conn {
-					phones[device_name].log_to_file("no phone conn error:", err)
-					//log.Println("no phone conn error:", err)
-					if (retry >= 3) {
-						conn.WriteMessage(websocket.TextMessage, []byte("no phone conn error"))
-						conn.Close()
-						set_phone_ws_state_in_redis(device_name, 0)
-						return
-					}
-					retry++
-					time.Sleep(time.Millisecond * 50)
-					continue
-				}
-				_, err = phone_conn.Write([]byte(getSendContent(device_type, first_frame)))
-				if err != nil {
-					//log.Println("send error", err)
-					phones[device_name].log_to_file("send error", err)
-				} else {
-					first_frame = false
-					break
-				}
-				phone_conn.Close()
-			}
-
-			data_len := 0
-			var data [] byte
-			for {
-				var buf = make([]byte, 4096)
-				n, err := phone_conn.Read(buf)
-
-				if err == io.EOF {
-					break
-				}
-
-				if err != nil {
-					//log.Println("conn read error:", err)
-					phones[device_name].log_to_file("conn read error:", err)
-					//conn.WriteMessage(websocket.TextMessage, []byte("no data error"))
-					set_phone_ws_state_in_redis(device_name, 0)
-					return
-				}
-				start_index := 0
-				header_index := bytes.Index(buf[:n], []byte("\r\n\r\n"))
-				if header_index > 0 {
-					start_index = header_index + 4
-				}
-				data = append(data, buf[start_index:n]...)
-				//conn.WriteMessage(websocket.BinaryMessage, buf[start_index:n])
-				data_len += n
-
-			}
-			clientConn.send <- data
-		//log.Println(uri, "send", len(data))
-			phones[device_name].log_to_file(uri, "send", len(data))
-			phone_conn.Close()
-			time.Sleep(time.Millisecond * 50)
-		}
-
-	}
+        select {
+        case stop := <-clientConn.stop:
+            if stop == 1 {
+                phones[device_name].log_to_file("client close, stop fetch data")
+                set_phone_ws_state_in_redis(device_name, 0)
+                phones[device_name].Conn.Write([]byte(stopRequestContent))
+                return
+            }
+        }
+    }
 }
 
 func start_ws() {

@@ -23,7 +23,7 @@ type Phone struct {
 	Device_name string
 	Random      string
 	Last_known  string
-    Client_conn ClientConn
+    Client_conn *ClientConn
 	Data_client chan []byte
 	Data_device chan []byte
 	Stop        chan int
@@ -41,7 +41,6 @@ func ReceivePhoneData(phone *Phone) {
 }
 
 func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
-    str_data := string(data)
     str_head := string(data[:head_length])
     body := data[head_length:]
     str_type := str_head[3:4]
@@ -49,7 +48,6 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
         var deviceMsg DeviceMsg
         err := json.Unmarshal(body, &deviceMsg)
         if err != nil{
-            fmt.Println(err)
             return
         }
         if deviceMsg.MsgType == "heart"{
@@ -58,8 +56,6 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
     }else if str_type == "2"{
         phone.Client_conn.send <- body
     }
-    fmt.Println(str_head)
-    fmt.Println(str_data)
 }
 
 func ReadDataFromDevice(phone *Phone) {
@@ -85,11 +81,11 @@ func ReadDataFromDevice(phone *Phone) {
             return
         }
 
-        head_length := bytes.Index(content, []byte("/r/n/r/n")) + len([]byte("/r/n/r/n"))
+        head_length := bytes.Index(content, []byte("\r\n\r\n")) + len([]byte("\r\n\r\n"))
         headStr := string(content[:head_length])
 
         // STP device_name/random
-        lines := strings.Split(headStr, "/r/n")
+        lines := strings.Split(headStr, "\r\n")
         if len(lines) > 1 {
             length := lines[1]
             int_length, err := strconv.Atoi(length)
@@ -355,7 +351,7 @@ func process_phone_conn(conn net.TCPConn) {
 
 	if strings.HasPrefix(content, "STP") {
 		// STP device_name/random
-		lines := strings.Split(content, "/r/n")
+		lines := strings.Split(content, "\r\n")
 		if len(lines) > 0 {
 			first_line := lines[0]
 			p1 := strings.Index(first_line, "/")
