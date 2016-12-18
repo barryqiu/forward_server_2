@@ -44,7 +44,7 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
     str_data := string(data)
     str_head := string(data[:head_length])
     body := data[head_length:]
-    str_type := str_head[3]
+    str_type := str_head[3:4]
     if(str_type == "1"){
         var deviceMsg DeviceMsg
         err := json.Unmarshal(body, deviceMsg)
