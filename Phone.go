@@ -358,7 +358,7 @@ func process_phone_conn(conn net.TCPConn) {
 
 	if strings.HasPrefix(content_str, "STP") {
 		// STP device_name/random
-		lines := strings.Split(content_str, `\\r\\n`)
+		lines := strings.Split(content_str, "\r\n")
         fmt.Println(lines)
 		if len(lines) > 0 {
 			first_line := lines[0]
