@@ -305,6 +305,8 @@ func process_phone_conn(conn net.TCPConn) {
 		log.Println("phone conn read error:", err)
 		return
 	}
+    fmt.Println([]byte("STP device_name/random\r\n0\r\n\r\n"))
+    fmt.Println(buf[:n])
 	content := string(buf[:n])
 
     fmt.Println(content)
@@ -350,6 +352,7 @@ func process_phone_conn(conn net.TCPConn) {
 		conn.Close()
 		return
 	}
+
 
 
 	if strings.HasPrefix(content, "STP") {
