@@ -299,27 +299,28 @@ func process_phone_conn(conn net.TCPConn) {
 	if (net.TCPConn{}) == conn {
 		return
 	}
+    var content []byte
 	var buf = make([]byte, 4096)
-	n, err := conn.Read(buf)
-	if err != nil {
-		log.Println("phone conn read error:", err)
-		return
-	}
-    fmt.Println([]byte("STP device_name/random\r\n0\r\n\r\n"))
-    fmt.Println(buf[:n])
-	content := string(buf[:n])
 
-    fmt.Println(content)
+    for ; ;  {
+        n, err := conn.Read(buf)
+        if err != nil {
+            log.Println("phone conn read error:", err)
+            conn.Close()
+            return
+        }
+        content = append(content, buf[:n]...)
+        if bytes.Index(content, []byte("\r\n\r\n")) > 0 {
+           break
+        }
+    }
 
-	pos := strings.Index(content, "/")
-	if pos == -1 {
-		conn.Close()
-		return
-	}
+    content_str := string(content)
+
 
     // GET /register_/device_name/random/version
-	if strings.HasPrefix(content, "GET /register_") {
-		req, err := getRequestInfo(content)
+	if strings.HasPrefix(content_str, "GET /register_") {
+		req, err := getRequestInfo(content_str)
 		if err != nil {
 			log.Println("phone conn read error:", err)
 			return
@@ -355,9 +356,9 @@ func process_phone_conn(conn net.TCPConn) {
 
 
 
-	if strings.HasPrefix(content, "STP") {
+	if strings.HasPrefix(content_str, "STP") {
 		// STP device_name/random
-		lines := strings.Split(content, `\\r\\n`)
+		lines := strings.Split(content_str, `\\r\\n`)
         fmt.Println(lines)
 		if len(lines) > 0 {
 			first_line := lines[0]
