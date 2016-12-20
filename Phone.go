@@ -365,10 +365,6 @@ func process_phone_conn(conn net.TCPConn) {
 			device_name := first_line[4:p1]
 			random := first_line[p1+1:]
 
-            fmt.Println(first_line)
-            fmt.Println(device_name)
-            fmt.Println(random)
-
 			if len(device_name) <= 0 || len(random) <= 0 {
 				log.Println("device_name or random len = 0")
 				conn.Write([]byte("stop"))

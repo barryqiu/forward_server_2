@@ -183,13 +183,13 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	ws_state := get_phone_ws_state_in_redis(device_name)
-	if ws_state == 1{
-		phones[device_name].log_to_file(device_name + " is in use")
-		conn.WriteMessage(websocket.TextMessage, []byte("device is in use"))
-		conn.Close()
-		return
-	}
+	//ws_state := get_phone_ws_state_in_redis(device_name)
+	//if ws_state == 1{
+	//	phones[device_name].log_to_file(device_name + " is in use")
+	//	conn.WriteMessage(websocket.TextMessage, []byte("device is in use"))
+	//	conn.Close()
+	//	return
+	//}
 
 	phones[device_name].log_to_file(fmt.Sprintf("param : %v", clientParam))
 	//log.Printf("param : %v\n", clientParam)
