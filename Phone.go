@@ -54,6 +54,7 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int)  {
             phone.Conn.Write(body)
         }
     }else if str_type == "2"{
+        fmt.Println(string(body), phone.Client_conn)
         phone.Client_conn.send <- body
     }
 }

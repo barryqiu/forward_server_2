@@ -109,6 +109,8 @@ func (c *ClientConn) writePump() {
 				return
 			}
 
+            fmt.Println(string(message))
+
 			w.Write(message)
 
 			if err := w.Close(); err != nil {
