@@ -69,11 +69,15 @@ func ReadDataFromDevice(phone *Phone) {
         }
         var buf = make([]byte, 4096)
         n, err := phone.Conn.Read(buf)
-        if err != nil {
+        if err != nil || n == 0{
             log.Println("phone conn read error:", err)
             continue
         }
         content = append(content, buf[:n]...)
+
+        if (bytes.Index(content, []byte("\r\n\r\n")) < 0){
+            continue
+        }
 
         pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
@@ -82,12 +86,12 @@ func ReadDataFromDevice(phone *Phone) {
             return
         }
 
-        if (bytes.Index(content, []byte("\r\n\r\n")) < 0){
-            continue
-        }
+        fmt.Println(string(content))
 
         head_length := bytes.Index(content, []byte("\r\n\r\n")) + len([]byte("\r\n\r\n"))
         headStr := string(content[:head_length])
+
+        fmt.Println(headStr)
 
         // STP device_name/random
         lines := strings.Split(headStr, "\r\n")
