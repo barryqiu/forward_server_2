@@ -64,6 +64,7 @@ func ReadDataFromDevice(phone *Phone) {
     pack_length := 0
     for ; ;  {
         if (net.TCPConn{}) == phone.Conn {
+            fmt.Println("no conn sleep 1 second")
             time.Sleep(time.Second * 1)
             continue
         }
@@ -74,6 +75,8 @@ func ReadDataFromDevice(phone *Phone) {
             continue
         }
         content = append(content, buf[:n]...)
+
+        fmt.Println(string(content))
 
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0){
             continue
