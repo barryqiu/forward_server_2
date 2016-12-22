@@ -379,7 +379,7 @@ func process_phone_conn(conn net.TCPConn) {
 			_, ok := phones[device_name]
 
 			if ok && (phones[device_name].Random == random) {
-				//log.Println(user_name, " phone append a conn", conn.RemoteAddr().String())
+				log.Println(" phone receive a conn", device_name, random, conn.RemoteAddr().String())
 				phones[device_name].append_conn(conn)
 				return
 			} else if !ok {
