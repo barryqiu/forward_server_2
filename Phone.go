@@ -399,6 +399,8 @@ func process_phone_conn(conn net.TCPConn) {
 			}
 		}
 
+	}else {
+        log.Println("wrong format:", content_str)
+        conn.Close()
 	}
-
 }
