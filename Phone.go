@@ -70,10 +70,17 @@ func ReadDataFromDevice(phone *Phone) {
         }
         var buf = make([]byte, 4096)
         n, err := phone.Conn.Read(buf)
-        if err != nil || n == 0{
+        if err != nil{
             log.Println("phone conn read error:", err)
+            phone.Conn.Close()
+            phone.Conn = net.TCPConn{}
             continue
         }
+
+        if n == 0 {
+            continue
+        }
+
         fmt.Println("receive",  string(buf[:n]))
         content = append(content, buf[:n]...)
 
