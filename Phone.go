@@ -81,7 +81,6 @@ func ReadDataFromDevice(phone *Phone) {
             continue
         }
 
-        fmt.Println("receive",  string(buf[:n]))
         content = append(content, buf[:n]...)
 
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0){
