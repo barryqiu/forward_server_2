@@ -65,6 +65,7 @@ func ReadDataFromDevice(phone *Phone) {
     for ; ;  {
         if (net.TCPConn{}) == phone.Conn {
             time.Sleep(time.Second * 1)
+            phone.log_to_file("no conn sleep 1 second")
             continue
         }
         var buf = make([]byte, 4096)
@@ -73,6 +74,7 @@ func ReadDataFromDevice(phone *Phone) {
             log.Println("phone conn read error:", err)
             continue
         }
+        fmt.Println("receive",  string(buf[:n]))
         content = append(content, buf[:n]...)
 
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0){
