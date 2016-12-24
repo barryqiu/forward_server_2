@@ -221,6 +221,6 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
 
 func start_ws() {
     http.HandleFunc("/", get_screen)
-    log.Println("listen web socket 8001 success")
+    log.Println("listen web socket 5001 success")
     http.ListenAndServe(*address, nil)
 }

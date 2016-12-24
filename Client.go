@@ -51,6 +51,8 @@ func processClientReq(conn net.TCPConn) {
 
     log.Println("receive client conn from address", conn.RemoteAddr().String())
 
+    defer conn.Close()
+
     var content []byte
     var header []byte
     var body []byte
@@ -121,6 +123,7 @@ func processClientReq(conn net.TCPConn) {
     if len(infos) > 2 && strings.HasPrefix(infos[2], "touch") {
         phones[device_name].WriteMsgToDevice(body, 2)
         phones[device_name].log_to_file("touch", string(body))
+        conn.Write([]byte(headerHtml))
     }
 
     // if uri like /device_name/ctrl
@@ -128,5 +131,6 @@ func processClientReq(conn net.TCPConn) {
     if len(infos) > 2 && strings.HasPrefix(infos[2], "ctrl") {
         phones[device_name].WriteMsgToDevice(body, 2)
         phones[device_name].log_to_file("ctrl", string(body))
+        conn.Write([]byte(headerHtml))
     }
 }
