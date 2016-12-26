@@ -75,12 +75,11 @@ func ReadDataFromDevice(phone *Phone) {
 
         content = append(content, buf[:n]...)
 
+        phone.log_to_file("curr recevie", string(content))
+
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0) {
             continue
         }
-
-        //fmt.Println("curr recevie", string(content))
-        phone.log_to_file("curr recevie", string(content))
 
         pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
