@@ -36,6 +36,7 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int) {
     str_head := string(data[:head_length])
     body := data[head_length:]
     str_type := str_head[3:4]
+	fmt.Println("receive package", string(data))
     if (str_type == "1") {
         var deviceMsg DeviceMsg
         err := json.Unmarshal(body, &deviceMsg)
@@ -77,6 +78,8 @@ func ReadDataFromDevice(phone *Phone) {
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0) {
             continue
         }
+
+        fmt.Println("curr recevie", string(content))
 
         pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
