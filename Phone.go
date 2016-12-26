@@ -80,6 +80,7 @@ func ReadDataFromDevice(phone *Phone) {
         }
 
         //fmt.Println("curr recevie", string(content))
+        phone.log_to_file("curr recevie", string(content))
 
         pack_start_index := bytes.Index(content, []byte("STP"))
         if pack_start_index != 0 {
