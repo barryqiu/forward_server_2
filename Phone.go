@@ -43,7 +43,7 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int) {
             return
         }
         if deviceMsg.MsgType == "heart" {
-            phone.Conn.Write(body)
+            phone.WriteMsgToDevice(body, 1)
             log.Println("receive heart")
         }
     } else if str_type == "2" {
