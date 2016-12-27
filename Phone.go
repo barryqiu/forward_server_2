@@ -158,6 +158,9 @@ func (phone *Phone) WriteMsgToDevice(data [] byte, data_type int) error {
         }
         phone.mu.Lock()
         _, err = phone.Conn.Write(data)
+        if err != nil {
+            phone.log_to_file("write data to device success", string(data))
+        }
         phone.mu.Unlock()
         break
     }
