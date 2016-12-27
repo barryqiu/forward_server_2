@@ -210,6 +210,7 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
         select {
         case stop := <-clientConn.stop:
             if stop == 1 {
+                clientConn.ws = nil
                 phones[device_name].log_to_file("client close, stop fetch data")
                 set_phone_ws_state_in_redis(device_name, 0)
                 phones[device_name].WriteMsgToDevice([]byte(stopRequestContent), 1)

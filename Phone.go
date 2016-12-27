@@ -48,9 +48,10 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int) {
             log.Println("receive heart")
         }
     } else if str_type == "2" {
-        if (phone.Client_conn == nil){
+        if (phone.Client_conn == nil || phone.Client_conn.ws == nil){
             phone.log_to_file("empty ws client conn")
         }else {
+            phone.log_to_file("send data", len(body))
             phone.Client_conn.send <- body
         }
     }
@@ -95,7 +96,7 @@ func ReadDataFromDevice(phone *Phone) {
         head_length := bytes.Index(content, []byte("\r\n\r\n")) + len([]byte("\r\n\r\n"))
         headStr := string(content[:head_length])
 
-        phone.log_to_file("curr head", headStr)
+        //phone.log_to_file("curr head", headStr)
 
         // STP device_name/random
         lines := strings.Split(headStr, "\r\n")
