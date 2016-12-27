@@ -75,7 +75,7 @@ func ReadDataFromDevice(phone *Phone) {
 
         content = append(content, buf[:n]...)
 
-        phone.log_to_file("curr recevie", string(content))
+        //phone.log_to_file("curr recevie", string(content))
 
         if (bytes.Index(content, []byte("\r\n\r\n")) < 0) {
             continue
@@ -90,6 +90,8 @@ func ReadDataFromDevice(phone *Phone) {
 
         head_length := bytes.Index(content, []byte("\r\n\r\n")) + len([]byte("\r\n\r\n"))
         headStr := string(content[:head_length])
+
+        phone.log_to_file("curr head", headStr)
 
         // STP device_name/random
         lines := strings.Split(headStr, "\r\n")
