@@ -48,6 +48,9 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int) {
             log.Println("receive heart")
         }
     } else if str_type == "2" {
+        if (phone.Client_conn == nil){
+            phone.log_to_file("empty ws client conn")
+        }
         phone.Client_conn.send <- body
     }
 }
