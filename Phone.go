@@ -44,8 +44,13 @@ func ProcessDevicePackage(phone *Phone, data []byte, head_length int) {
             return
         }
         if deviceMsg.MsgType == "heart" {
-            phone.WriteMsgToDevice(body, 1)
-            log.Println("receive heart")
+            phone.log_to_file("receive heart")
+            err := phone.WriteMsgToDevice(body, 1)
+            if err == nil{
+                phone.log_to_file("send  heart success" )
+            }else {
+                phone.log_to_file("send  heart fail", err)
+            }
         }
     } else if str_type == "2" {
         if (phone.Client_conn == nil || phone.Client_conn.ws == nil){
@@ -158,9 +163,6 @@ func (phone *Phone) WriteMsgToDevice(data [] byte, data_type int) error {
         }
         phone.mu.Lock()
         _, err = phone.Conn.Write(data)
-        if err != nil {
-            phone.log_to_file("write data to device success", string(data))
-        }
         phone.mu.Unlock()
         break
     }
