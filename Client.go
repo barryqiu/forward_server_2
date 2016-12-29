@@ -122,7 +122,7 @@ func processClientReq(conn net.TCPConn) {
     // 向设备端发送触摸动作
     if len(infos) > 2 && strings.HasPrefix(infos[2], "touch") {
         phones[device_name].WriteMsgToDevice(body, 2)
-        phones[device_name].log_to_file("touch", string(body))
+        phones[device_name].log_to_file("touch:", string(body))
         conn.Write([]byte(headerHtml))
     }
 

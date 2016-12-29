@@ -73,7 +73,7 @@ func ReadDataFromDevice(phone *Phone) {
         var buf = make([]byte, 4096)
         n, err := phone.Conn.Read(buf)
         if err != nil {
-            log.Println("phone conn read error:", err)
+            log.Println("read from device,phone conn read error:", err)
             phone.Conn.Close()
             phone.Conn = net.TCPConn{}
             continue
@@ -334,7 +334,7 @@ func process_phone_conn(conn net.TCPConn) {
     for ; ; {
         n, err := conn.Read(buf)
         if err != nil {
-            log.Println("phone conn read error:", err)
+            log.Println("process phone conn, phone conn read error:", err)
             conn.Close()
             return
         }
@@ -351,7 +351,7 @@ func process_phone_conn(conn net.TCPConn) {
     if strings.HasPrefix(content_str, "GET /register_") {
         req, err := getRequestInfo(content_str)
         if err != nil {
-            log.Println("phone conn read error:", err)
+            log.Println("wrong request format:", err)
             return
         }
         infos := strings.Split(req.RequestURI, "/")
