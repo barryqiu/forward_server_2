@@ -334,7 +334,7 @@ func process_phone_conn(conn net.TCPConn) {
     for ; ; {
         n, err := conn.Read(buf)
         if err != nil {
-            log.Println("process phone conn, phone conn read error:", err)
+            log.Println("process phone conn, phone conn read error:", err, conn.RemoteAddr(), conn.LocalAddr())
             conn.Close()
             return
         }
