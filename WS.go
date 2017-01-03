@@ -51,6 +51,7 @@ type ClientConn struct {
     ws    *websocket.Conn
     stop  chan int
     send  chan []byte
+    start_string string
 }
 
 
@@ -204,13 +205,15 @@ func get_screen(w http.ResponseWriter, req *http.Request) {
     }
     set_phone_ws_state_in_redis(device_name, 1)
     phones[device_name].Client_conn = clientConn
-    phones[device_name].WriteMsgToDevice([]byte(getSendContent(device_type)), 1)
+    clientConn.start_string = getSendContent(device_type)
+    phones[device_name].WriteMsgToDevice([]byte(clientConn.start_string), 1)
 
     for {
         select {
         case stop := <-clientConn.stop:
             if stop == 1 {
                 phones[device_name].log_to_file("client close, stop fetch data")
+                phones[device_name].Client_conn = nil
                 set_phone_ws_state_in_redis(device_name, 0)
                 phones[device_name].WriteMsgToDevice([]byte(stopRequestContent), 1)
                 return

@@ -145,8 +145,12 @@ func (phone *Phone) append_conn(conn net.TCPConn) error {
 
     // 通知云端连接建立成功
     phone.Conn.Write([]byte("STP1\r\n0\r\n\r\n"))
-    phone.log_to_file("new conn", conn.RemoteAddr().String())
+    // 如果此时正有设备连接着，则通知设备开始发送数据
+    if phone.Client_conn != nil{
+        phone.WriteMsgToDevice([]byte(phone.Client_conn.start_string), 1)
+    }
     phone.mu.Unlock()
+    phone.log_to_file("new conn", conn.RemoteAddr().String())
     return nil
 }
 
