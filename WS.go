@@ -17,8 +17,8 @@ var (
 
     upGrader = websocket.Upgrader{ReadBufferSize:4096, WriteBufferSize:40960} // use default options
 
-    sendVRequestContent = `{"msgtype":"startdata","data":"v"}`
-    sendHRequestContent = `{"msgtype":"startdata","data":"h"}`
+    sendVRequestContent = `{"msgtype":"startdata","data":"vln"}`
+    sendHRequestContent = `{"msgtype":"startdata","data":"hln"}`
     stopRequestContent = `{"msgtype":"stopdata","data":""}`
 )
 
